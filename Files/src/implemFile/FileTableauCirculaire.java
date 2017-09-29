@@ -42,8 +42,21 @@ public class FileTableauCirculaire implements Queue<Integer> {
 
     @Override
     public Iterator<Integer> iterator() {
-        // TODO Auto-generated method stub
-        return null;
+        Iterator<Integer> it = new Iterator<Integer>() {
+            int pos = tete;
+            @Override
+            public boolean hasNext() {
+                return (pos%MAX < (tete+longueur)%MAX);
+            }
+
+            @Override
+            public Integer next() {
+                int temp = tab[pos%MAX];
+                pos++;
+                return temp;
+            }
+        };
+        return it;
     }
 
     @Override
@@ -56,8 +69,23 @@ public class FileTableauCirculaire implements Queue<Integer> {
 
     @Override
     public <T> T[] toArray(T[] a) {
-        // TODO Auto-generated method stub
-        return null;
+        if(a == null)
+            throw new NullPointerException();
+        if(!( a instanceof Integer[]))
+            throw new ArrayStoreException();
+        Object[] temp = this.toArray();
+        Object[] result = new Object[temp.length];
+        if (a.length < longueur)
+            return (T[])temp;
+        else
+            for(int i = 0 ; i < temp.length ; i++) {
+                if (i > longueur)
+                    result[i] = null;
+                else
+                    result[i] = tab[(i + tete) % MAX];
+            }
+            return (T[])result;
+
     }
 
     @Override
@@ -98,6 +126,7 @@ public class FileTableauCirculaire implements Queue<Integer> {
         boolean trouve = true;
         Object[] o = c.toArray();
         int i = 0;
+
         while(trouve && i < o.length) {
             if(o[i] == null)
                 throw new NullPointerException();
@@ -117,6 +146,7 @@ public class FileTableauCirculaire implements Queue<Integer> {
         boolean trouve = true;
         Object[] o = c.toArray();
         int i = 0;
+
         while(trouve && i < o.length) {
             if(o[i] == null)
                 throw new NullPointerException();
@@ -133,21 +163,22 @@ public class FileTableauCirculaire implements Queue<Integer> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        boolean trouve = true;
+        boolean done = true;
         int buffer = 0;
         Object[] o = c.toArray();
         int i = 0;
-        while(trouve && i < o.length) {
+
+        while(done && i < o.length) {
             buffer = 0;
             if(o[i] == null)
                 throw new NullPointerException();
             else if(o[i] instanceof Integer) {
                 for( int j = tete ; j < tete+longueur ; j++ ) {
-                    if (tab[j+buffer] == (Integer) o[i]) {
+                    if (tab[(j + buffer)%MAX] == (Integer) o[i]) {
                         buffer++;
                     }
                     if (buffer != 0)
-                        tab[j] = tab[j+buffer];
+                        tab[j%MAX] = tab[(j+buffer)%MAX];
                 }
                 i++;
             }
@@ -155,13 +186,41 @@ public class FileTableauCirculaire implements Queue<Integer> {
                 throw new ClassCastException();
             longueur -= buffer;
         }
-        return trouve;
+        return done;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        return false;
+        for(Object temp : c) {
+            if(temp == null)
+                throw new NullPointerException();
+            if (!(temp instanceof Integer))
+                throw new ClassCastException();
+        }
+
+        boolean done = true;
+        int buffer = 0;
+        Object[] o = c.toArray();
+        int j = tete;
+
+        while( j+buffer < tete+longueur ) {
+            boolean trouve = false;
+            int i = 0;
+            while( !trouve && i < o.length ) {
+                if (tab[(j + buffer)%MAX] == (Integer)o[i])
+                    trouve = true;
+                i++;
+            }
+            if(!trouve)
+                buffer++;
+            else
+                j++;
+
+            if (buffer != 0)
+                tab[j%MAX] = tab[(j+buffer)%MAX];
+        }
+        longueur -= buffer;
+        return done;
     }
 
     @Override
