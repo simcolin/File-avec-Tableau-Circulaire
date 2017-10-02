@@ -1,9 +1,7 @@
 package implemFile;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Queue;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class FileTableauCirculaire implements Queue<Integer> {
 
@@ -73,19 +71,15 @@ public class FileTableauCirculaire implements Queue<Integer> {
             throw new NullPointerException();
         if(!( a instanceof Integer[]))
             throw new ArrayStoreException();
-        Object[] temp = this.toArray();
-        Object[] result = new Object[temp.length];
-        if (a.length < longueur)
-            return (T[])temp;
-        else
-            for(int i = 0 ; i < temp.length ; i++) {
-                if (i > longueur)
-                    result[i] = null;
-                else
-                    result[i] = tab[(i + tete) % MAX];
-            }
-            return (T[])result;
 
+        T[] r = a.length >= longueur
+                ? a
+                : (T[]) Array.newInstance(a.getClass().getComponentType(), longueur);
+
+        for (int i = 0; i < r.length; i++) {
+                r[i] = (T) tab[(i+tete)%MAX];
+        }
+        return r;
     }
 
     @Override
